@@ -1,5 +1,4 @@
-import { Calendar, MapPin, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { CategoryBadge } from './CategoryBadge';
 import type { Opportunity } from '@/data/opportunities';
@@ -9,30 +8,37 @@ interface OpportunityCardProps {
 }
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  const navigate = useNavigate();
 
-  const handleApply = () => {
-    window.open(opportunity.url, '_blank', 'noopener,noreferrer');
+  const handleClick = () => {
+    navigate(`/opportunity/${opportunity.id}`);
   };
 
   return (
-    <Card className="group h-full flex flex-col bg-card shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border-border/50">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
+    <Card 
+      onClick={handleClick}
+      className="group h-full flex flex-col bg-card shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border-border/50 cursor-pointer overflow-hidden"
+    >
+      <div className="relative h-40 overflow-hidden">
+        <img 
+          src={opportunity.image} 
+          alt={opportunity.title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute top-3 left-3">
           <CategoryBadge type={opportunity.type} size="sm" />
-          {opportunity.amount && (
+        </div>
+        {opportunity.amount && (
+          <div className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm px-2 py-1 rounded-md">
             <span className="text-sm font-semibold text-primary">
               {opportunity.amount}
             </span>
-          )}
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mt-3 line-clamp-2 group-hover:text-primary transition-colors">
+          </div>
+        )}
+      </div>
+
+      <CardHeader className="pb-2 pt-4">
+        <h3 className="text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
           {opportunity.title}
         </h3>
         <p className="text-sm text-muted-foreground font-medium">
@@ -41,11 +47,11 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 pt-0">
-        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
           {opportunity.description}
         </p>
 
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-1.5">
           {opportunity.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
@@ -55,27 +61,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             </span>
           ))}
         </div>
-
-        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 shrink-0" />
-            <span>Deadline: {formatDate(opportunity.deadline)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span>{opportunity.location}</span>
-          </div>
-        </div>
       </CardContent>
 
-      <CardFooter className="pt-4">
-        <Button
-          onClick={handleApply}
-          className="w-full gap-2 font-semibold"
-        >
-          Apply Now
-          <ExternalLink className="h-4 w-4" />
-        </Button>
+      <CardFooter className="pt-2 pb-4">
+        <p className="text-xs text-muted-foreground">
+          Click to view details →
+        </p>
       </CardFooter>
     </Card>
   );
