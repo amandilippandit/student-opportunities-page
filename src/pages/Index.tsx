@@ -1,8 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { Menu } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { FilterSidebar } from '@/components/FilterSidebar';
 import { OpportunityCard } from '@/components/OpportunityCard';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { opportunities, type OpportunityType } from '@/data/opportunities';
 
 const Index = () => {
@@ -10,6 +13,14 @@ const Index = () => {
   const [selectedTypes, setSelectedTypes] = useState<OpportunityType[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedDeadlines, setSelectedDeadlines] = useState<string[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [isLarge, setIsLarge] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsLarge(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const filteredOpportunities = useMemo(() => {
     return opportunities.filter((opp) => {
@@ -67,14 +78,41 @@ const Index = () => {
 
       <main className="container pb-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          <FilterSidebar
-            selectedTypes={selectedTypes}
-            onTypeChange={setSelectedTypes}
-            selectedLocations={selectedLocations}
-            onLocationChange={setSelectedLocations}
-            selectedDeadlines={selectedDeadlines}
-            onDeadlineChange={setSelectedDeadlines}
-          />
+          {/* Mobile/Tablet Filter Toggle */}
+          <div className="lg:hidden mb-4">
+            <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2">
+                  <Menu className="h-4 w-4" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 overflow-y-auto">
+                <div className="mt-8">
+                  <FilterSidebar
+                    selectedTypes={selectedTypes}
+                    onTypeChange={setSelectedTypes}
+                    selectedLocations={selectedLocations}
+                    onLocationChange={setSelectedLocations}
+                    selectedDeadlines={selectedDeadlines}
+                    onDeadlineChange={setSelectedDeadlines}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Desktop Filter Sidebar */}
+          <div className="hidden lg:block lg:w-64 shrink-0">
+            <FilterSidebar
+              selectedTypes={selectedTypes}
+              onTypeChange={setSelectedTypes}
+              selectedLocations={selectedLocations}
+              onLocationChange={setSelectedLocations}
+              selectedDeadlines={selectedDeadlines}
+              onDeadlineChange={setSelectedDeadlines}
+            />
+          </div>
 
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">

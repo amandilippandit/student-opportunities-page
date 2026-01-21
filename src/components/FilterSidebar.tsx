@@ -77,8 +77,8 @@ export function FilterSidebar({
     selectedDeadlines.length > 0;
 
   return (
-    <aside className="w-full lg:w-64 shrink-0">
-      <div className="bg-card rounded-xl border border-border/50 shadow-card p-5 sticky top-4">
+    <aside className="w-full shrink-0">
+      <div className="bg-card rounded-xl border border-border/50 shadow-card p-5 lg:sticky lg:top-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">Filters</h2>
           {hasActiveFilters && (
