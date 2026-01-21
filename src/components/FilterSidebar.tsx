@@ -1,17 +1,23 @@
-import { Check } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import type { OpportunityType } from '@/data/opportunities';
 import { locations, deadlineFilters } from '@/data/opportunities';
 
 interface FilterSidebarProps {
   selectedTypes: OpportunityType[];
   onTypeChange: (types: OpportunityType[]) => void;
-  selectedLocation: string;
-  onLocationChange: (location: string) => void;
-  selectedDeadline: string;
-  onDeadlineChange: (deadline: string) => void;
+  selectedLocations: string[];
+  onLocationChange: (locations: string[]) => void;
+  selectedDeadlines: string[];
+  onDeadlineChange: (deadlines: string[]) => void;
 }
 
 const opportunityTypes: { value: OpportunityType; label: string; color: string }[] = [
@@ -21,14 +27,20 @@ const opportunityTypes: { value: OpportunityType; label: string; color: string }
   { value: 'competition', label: 'Competitions', color: 'bg-competition' },
 ];
 
+const locationOptions = locations.filter(l => l !== 'All Locations');
+
 export function FilterSidebar({
   selectedTypes,
   onTypeChange,
-  selectedLocation,
+  selectedLocations,
   onLocationChange,
-  selectedDeadline,
+  selectedDeadlines,
   onDeadlineChange,
 }: FilterSidebarProps) {
+  const [categoryOpen, setCategoryOpen] = useState(true);
+  const [locationOpen, setLocationOpen] = useState(true);
+  const [deadlineOpen, setDeadlineOpen] = useState(true);
+
   const toggleType = (type: OpportunityType) => {
     if (selectedTypes.includes(type)) {
       onTypeChange(selectedTypes.filter((t) => t !== type));
@@ -37,16 +49,32 @@ export function FilterSidebar({
     }
   };
 
+  const toggleLocation = (location: string) => {
+    if (selectedLocations.includes(location)) {
+      onLocationChange(selectedLocations.filter((l) => l !== location));
+    } else {
+      onLocationChange([...selectedLocations, location]);
+    }
+  };
+
+  const toggleDeadline = (deadline: string) => {
+    if (selectedDeadlines.includes(deadline)) {
+      onDeadlineChange(selectedDeadlines.filter((d) => d !== deadline));
+    } else {
+      onDeadlineChange([...selectedDeadlines, deadline]);
+    }
+  };
+
   const clearFilters = () => {
     onTypeChange([]);
-    onLocationChange('All Locations');
-    onDeadlineChange('all');
+    onLocationChange([]);
+    onDeadlineChange([]);
   };
 
   const hasActiveFilters =
     selectedTypes.length > 0 ||
-    selectedLocation !== 'All Locations' ||
-    selectedDeadline !== 'all';
+    selectedLocations.length > 0 ||
+    selectedDeadlines.length > 0;
 
   return (
     <aside className="w-full lg:w-64 shrink-0">
@@ -65,77 +93,98 @@ export function FilterSidebar({
           )}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-2">
           {/* Category Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">Category</h3>
-            <div className="space-y-2">
-              {opportunityTypes.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => toggleType(type.value)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    selectedTypes.includes(type.value)
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  )}
-                >
-                  <span className={cn('w-3 h-3 rounded-full shrink-0', type.color)} />
-                  <span className="flex-1 text-left">{type.label}</span>
-                  {selectedTypes.includes(type.value) && (
-                    <Check className="h-4 w-4 shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Collapsible open={categoryOpen} onOpenChange={setCategoryOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <span>Category</span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 transition-transform duration-200',
+                  categoryOpen && 'rotate-180'
+                )}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 pb-3">
+              <div className="space-y-2">
+                {opportunityTypes.map((type) => (
+                  <label
+                    key={type.value}
+                    className="flex items-center gap-3 px-1 py-1.5 rounded-md cursor-pointer hover:bg-secondary/50 transition-colors"
+                  >
+                    <Checkbox
+                      checked={selectedTypes.includes(type.value)}
+                      onCheckedChange={() => toggleType(type.value)}
+                    />
+                    <span className={cn('w-2.5 h-2.5 rounded-full shrink-0', type.color)} />
+                    <span className="text-sm text-foreground">{type.label}</span>
+                  </label>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <Separator />
+          <div className="border-t border-border" />
 
           {/* Location Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">Location</h3>
-            <div className="space-y-1">
-              {locations.map((location) => (
-                <button
-                  key={location}
-                  onClick={() => onLocationChange(location)}
-                  className={cn(
-                    'w-full px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors',
-                    selectedLocation === location
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  )}
-                >
-                  {location}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Collapsible open={locationOpen} onOpenChange={setLocationOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <span>Location</span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 transition-transform duration-200',
+                  locationOpen && 'rotate-180'
+                )}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 pb-3">
+              <div className="space-y-2">
+                {locationOptions.map((location) => (
+                  <label
+                    key={location}
+                    className="flex items-center gap-3 px-1 py-1.5 rounded-md cursor-pointer hover:bg-secondary/50 transition-colors"
+                  >
+                    <Checkbox
+                      checked={selectedLocations.includes(location)}
+                      onCheckedChange={() => toggleLocation(location)}
+                    />
+                    <span className="text-sm text-foreground">{location}</span>
+                  </label>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <Separator />
+          <div className="border-t border-border" />
 
           {/* Deadline Filter */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">Deadline</h3>
-            <div className="space-y-1">
-              {deadlineFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => onDeadlineChange(filter.value)}
-                  className={cn(
-                    'w-full px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors',
-                    selectedDeadline === filter.value
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  )}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Collapsible open={deadlineOpen} onOpenChange={setDeadlineOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <span>Deadline</span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 transition-transform duration-200',
+                  deadlineOpen && 'rotate-180'
+                )}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 pb-3">
+              <div className="space-y-2">
+                {deadlineFilters.filter(f => f.value !== 'all').map((filter) => (
+                  <label
+                    key={filter.value}
+                    className="flex items-center gap-3 px-1 py-1.5 rounded-md cursor-pointer hover:bg-secondary/50 transition-colors"
+                  >
+                    <Checkbox
+                      checked={selectedDeadlines.includes(filter.value)}
+                      onCheckedChange={() => toggleDeadline(filter.value)}
+                    />
+                    <span className="text-sm text-foreground">{filter.label}</span>
+                  </label>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
     </aside>

@@ -8,8 +8,8 @@ import { opportunities, type OpportunityType } from '@/data/opportunities';
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<OpportunityType[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState('All Locations');
-  const [selectedDeadline, setSelectedDeadline] = useState('all');
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedDeadlines, setSelectedDeadlines] = useState<string[]>([]);
 
   const filteredOpportunities = useMemo(() => {
     return opportunities.filter((opp) => {
@@ -25,27 +25,36 @@ const Index = () => {
       // Type filter
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(opp.type);
 
-      // Location filter
+      // Location filter (now multi-select)
       const matchesLocation =
-        selectedLocation === 'All Locations' ||
-        opp.location.toLowerCase().includes(selectedLocation.toLowerCase()) ||
-        (selectedLocation === 'International' && opp.location !== 'United States') ||
-        (selectedLocation === 'Global' && opp.location === 'Global');
+        selectedLocations.length === 0 ||
+        selectedLocations.some((loc) => {
+          if (loc === 'International') {
+            return opp.location !== 'United States';
+          }
+          if (loc === 'Global') {
+            return opp.location === 'Global';
+          }
+          return opp.location.toLowerCase().includes(loc.toLowerCase());
+        });
 
-      // Deadline filter
-      let matchesDeadline = true;
-      if (selectedDeadline !== 'all') {
-        const days = parseInt(selectedDeadline);
+      // Deadline filter (now multi-select)
+      let matchesDeadline = selectedDeadlines.length === 0;
+      if (!matchesDeadline) {
         const deadlineDate = new Date(opp.deadline);
         const today = new Date();
         const diffTime = deadlineDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        matchesDeadline = diffDays >= 0 && diffDays <= days;
+
+        matchesDeadline = selectedDeadlines.some((deadline) => {
+          const days = parseInt(deadline);
+          return diffDays >= 0 && diffDays <= days;
+        });
       }
 
       return matchesSearch && matchesType && matchesLocation && matchesDeadline;
     });
-  }, [searchQuery, selectedTypes, selectedLocation, selectedDeadline]);
+  }, [searchQuery, selectedTypes, selectedLocations, selectedDeadlines]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,10 +71,10 @@ const Index = () => {
           <FilterSidebar
             selectedTypes={selectedTypes}
             onTypeChange={setSelectedTypes}
-            selectedLocation={selectedLocation}
-            onLocationChange={setSelectedLocation}
-            selectedDeadline={selectedDeadline}
-            onDeadlineChange={setSelectedDeadline}
+            selectedLocations={selectedLocations}
+            onLocationChange={setSelectedLocations}
+            selectedDeadlines={selectedDeadlines}
+            onDeadlineChange={setSelectedDeadlines}
           />
 
           <div className="flex-1">
