@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      opportunities: {
+        Row: {
+          amount: string | null
+          created_at: string
+          deadline: string
+          description: string
+          full_description: string | null
+          id: string
+          image: string | null
+          location: string
+          organization: string
+          tags: string[] | null
+          title: string
+          type: Database["public"]["Enums"]["opportunity_type"]
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          amount?: string | null
+          created_at?: string
+          deadline: string
+          description: string
+          full_description?: string | null
+          id?: string
+          image?: string | null
+          location: string
+          organization: string
+          tags?: string[] | null
+          title: string
+          type: Database["public"]["Enums"]["opportunity_type"]
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          amount?: string | null
+          created_at?: string
+          deadline?: string
+          description?: string
+          full_description?: string | null
+          id?: string
+          image?: string | null
+          location?: string
+          organization?: string
+          tags?: string[] | null
+          title?: string
+          type?: Database["public"]["Enums"]["opportunity_type"]
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +73,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      opportunity_type: "scholarship" | "internship" | "summit" | "competition"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +200,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      opportunity_type: ["scholarship", "internship", "summit", "competition"],
+    },
   },
 } as const
