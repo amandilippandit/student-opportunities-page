@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { CategoryBadge } from './CategoryBadge';
-import type { Opportunity } from '@/data/opportunities';
+import { getOpportunityImage } from '@/lib/images';
+import type { Opportunity } from '@/services/opportunitiesService';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -20,8 +21,8 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       className="group bg-card shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 border-border/50 cursor-pointer overflow-hidden"
     >
       <div className="relative h-20 md:h-40 overflow-hidden">
-        <img 
-          src={opportunity.image} 
+        <img
+          src={getOpportunityImage(opportunity.type, opportunity.image_url)}
           alt={opportunity.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />

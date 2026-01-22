@@ -1,14 +1,45 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryBadge } from '@/components/CategoryBadge';
-import { opportunities } from '@/data/opportunities';
+import { getOpportunityImage } from '@/lib/images';
+import { toast } from 'sonner';
+import { opportunitiesService, type Opportunity } from '@/services/opportunitiesService';
 
 const OpportunityDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const opportunity = opportunities.find((opp) => opp.id === id);
+  useEffect(() => {
+    async function loadOpportunity() {
+      if (!id) return;
+      try {
+        setLoading(true);
+        const data = await opportunitiesService.fetchOpportunityById(id);
+        setOpportunity(data);
+      } catch (error) {
+        toast.error('Failed to load opportunity');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadOpportunity();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">Loading opportunity...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!opportunity) {
     return (
@@ -53,7 +84,7 @@ const OpportunityDetail = () => {
       {/* Hero Image */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <img
-          src={opportunity.image}
+          src={getOpportunityImage(opportunity.type, opportunity.image_url)}
           alt={opportunity.title}
           className="w-full h-full object-cover"
         />

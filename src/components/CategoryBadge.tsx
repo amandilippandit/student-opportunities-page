@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { OpportunityType } from '@/data/opportunities';
+import type { OpportunityType } from '@/services/opportunitiesService';
 import { GraduationCap, Briefcase, Users, Trophy } from 'lucide-react';
 
 interface CategoryBadgeProps {

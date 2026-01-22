@@ -8,8 +8,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import type { OpportunityType } from '@/data/opportunities';
-import { locations, deadlineFilters } from '@/data/opportunities';
+import type { OpportunityType } from '@/services/opportunitiesService';
+import { locations, deadlineFilters } from '@/data/filterOptions';
 
 interface FilterSidebarProps {
   selectedTypes: OpportunityType[];

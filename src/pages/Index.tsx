@@ -6,9 +6,12 @@ import { FilterSidebar } from '@/components/FilterSidebar';
 import { OpportunityCard } from '@/components/OpportunityCard';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { opportunities, type OpportunityType } from '@/data/opportunities';
+import { toast } from 'sonner';
+import { opportunitiesService, type Opportunity, type OpportunityType } from '@/services/opportunitiesService';
 
 const Index = () => {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<OpportunityType[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -20,6 +23,23 @@ const Index = () => {
     const handleResize = () => setIsLarge(window.innerWidth >= 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    async function loadOpportunities() {
+      try {
+        setLoading(true);
+        const data = await opportunitiesService.fetchOpportunities();
+        setOpportunities(data);
+      } catch (error) {
+        toast.error('Failed to load opportunities');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadOpportunities();
   }, []);
 
   const filteredOpportunities = useMemo(() => {
@@ -117,11 +137,15 @@ const Index = () => {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-foreground">
-                {filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'Result' : 'Results'}
+                {loading ? 'Loading...' : `${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'Result' : 'Results'}`}
               </h2>
             </div>
 
-            {filteredOpportunities.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-16">
+                <p className="text-lg text-muted-foreground">Loading opportunities...</p>
+              </div>
+            ) : filteredOpportunities.length > 0 ? (
               <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                 {filteredOpportunities.map((opportunity, index) => (
                   <div
