@@ -7,9 +7,50 @@ import Index from "./pages/Index";
 import OpportunityDetail from "./pages/OpportunityDetail";
 import OpportunitiesCMS from "./pages/OpportunitiesCMS";
 import NotFound from "./pages/NotFound";
+import { useEffect, useState } from "react";
+import { supabase } from "../supabase/client";
+
+const [opportunities, setOpportunities] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {loading && <p>Loading...</p>}
+
+{opportunities.map((op) => (
+  <div key={op.id} className="border p-4 rounded mb-4">
+    <h2 className="text-lg font-bold">{op.title}</h2>
+    <p>{op.organization}</p>
+    <p>{op.description}</p>
+
+    <a
+      href={op.apply_link}
+      target="_blank"
+      className="text-blue-600 underline"
+    >
+      Apply
+    </a>
+  </div>
+))}
+{
+  const fetchOpportunities = async () => {
+    const { data, error } = await supabase
+      .from("opportunities")
+      .select("*")
+      .eq("is_active", true)
+      .order("deadline", { ascending: true });
+
+    if (error) {
+      console.error(error);
+    } else {
+      setOpportunities(data || []);
+    }
+
+    setLoading(false);
+  };
+
+  fetchOpportunities();
+}, []);
 
 const queryClient = new QueryClient();
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
